@@ -23,7 +23,7 @@ async function warmupUrl(url) {
   try {
     await fetch(url);
   } catch {
-    // Cold start warm-up attempt; ignore initial network failure
+    // Server warming up; network failure handled
   }
 }
 
@@ -53,54 +53,77 @@ async function smoothScrollTo(page, targetY, durationMs = 1500) {
   }, { target: targetY, duration: durationMs });
 }
 
-async function performScrollTour(page) {
-  const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
-  const middleY = Math.max(0, Math.floor((scrollHeight - 720) / 2));
-  const bottomY = Math.max(0, scrollHeight - 720);
-
-  await smoothScrollTo(page, middleY, 1500);
-  await page.waitForTimeout(2000);
-
-  await smoothScrollTo(page, bottomY, 1500);
-  await page.waitForTimeout(2500);
-
-  await smoothScrollTo(page, 0, 1500);
+async function navigateAndPrepare(page) {
+  await page.goto(TARGET_URL, { waitUntil: "networkidle" });
+  await page.waitForFunction(() => {
+    const textReady = document.body && document.body.innerText.trim().length > 50;
+    const badge = document.getElementById("aqi-badge");
+    return textReady && badge && !badge.textContent.includes("Loading");
+  });
+  await page.evaluate(() => new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res))));
   await page.waitForTimeout(1000);
 }
 
-async function waitForInitialDashboard(page) {
-  await page.goto(TARGET_URL, { waitUntil: "networkidle" });
+async function runAqiSearchStep(page) {
+  const cityInput = page.locator("#city-input");
+  await cityInput.click();
+  await cityInput.fill("");
+  await cityInput.pressSequentially("Mumbai", { delay: 90 });
+  await page.locator("#btn-fetch-aqi").click();
+
   await page.waitForFunction(() => {
-    const badge = document.getElementById("aqi-badge");
-    const val = document.getElementById("aqi-value");
-    return badge && !badge.textContent.includes("Loading") && val && val.textContent !== "--";
+    const label = document.getElementById("aqi-location-label");
+    return label && label.textContent.includes("Mumbai");
   });
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(1500);
 }
 
-async function triggerGenAiAndActions(page) {
-  const asthmaCheck = page.locator("#chk-asthma");
-  if (await asthmaCheck.count() > 0) {
-    await asthmaCheck.check();
-  }
+async function runCalculatorStep(page) {
+  const kmInput = page.locator("#calc-weekly-km");
+  await kmInput.click();
+  await kmInput.fill("");
+  await kmInput.pressSequentially("120", { delay: 90 });
 
-  await page.locator("#btn-generate-plan").click();
-  await page.waitForFunction(() => {
-    const container = document.getElementById("ai-plan-container");
-    return container && !container.textContent.includes("Generating") && container.children.length > 0;
-  });
-
+  await page.locator("#calc-target-mode").selectOption("bus");
+  await page.locator("#calc-chk-purifier").click();
   await page.locator("#btn-calculate").click();
+
   await page.waitForFunction(() => {
     const savings = document.getElementById("res-co2-savings");
     return savings && savings.textContent !== "--" && savings.textContent !== "-- kg";
   });
+  await page.waitForTimeout(1500);
+}
+
+async function runGenAiPlanStep(page) {
+  await smoothScrollTo(page, 420, 1000);
+  await page.locator("#chk-children").check();
+  await page.locator("#chk-asthma").check();
+  await page.locator("#commute-mode-select").selectOption("motorcycle");
+
+  await page.locator("#btn-generate-plan").click();
+  await page.waitForFunction(() => {
+    const box = document.getElementById("ai-plan-container");
+    return box && !box.textContent.includes("Generating") && box.children.length > 0;
+  });
+  await page.waitForTimeout(2000);
+}
+
+async function runProtocolsAndEnd(page) {
+  const maxScroll = await page.evaluate(() => document.body.scrollHeight);
+  await smoothScrollTo(page, maxScroll, 1200);
+  await page.waitForTimeout(2500);
+
+  await smoothScrollTo(page, 0, 1000);
+  await page.waitForTimeout(1000);
 }
 
 async function performWalkthrough(page) {
-  await waitForInitialDashboard(page);
-  await triggerGenAiAndActions(page);
-  await performScrollTour(page);
+  await navigateAndPrepare(page);
+  await runAqiSearchStep(page);
+  await runCalculatorStep(page);
+  await runGenAiPlanStep(page);
+  await runProtocolsAndEnd(page);
 }
 
 async function recordDemo() {
