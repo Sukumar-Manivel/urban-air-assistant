@@ -1,0 +1,61 @@
+import { Router } from "express";
+import { getCityAirQuality } from "../services/airQualityService.js";
+import { generateGeminiPlan } from "../services/geminiService.js";
+import { computeImpact } from "../services/calculatorService.js";
+
+const router = Router();
+
+export function handleHealth(_req, res) {
+  res.status(200).json({
+    status: "ok",
+    service: "urban-air-assistant",
+    version: "1.0.0",
+    geminiEnabled: Boolean(process.env.GEMINI_API_KEY),
+    timestamp: new Date().toISOString()
+  });
+}
+
+export async function handleAirQuality(req, res) {
+  const city = (req.query.city || "Delhi").toString().slice(0, 60);
+  try {
+    const data = await getCityAirQuality(city);
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch air quality", details: err.message });
+  }
+}
+
+export async function handleActionPlan(req, res) {
+  const { city = "Delhi", household = {} } = req.body || {};
+  const sanitizedCity = String(city).slice(0, 60);
+  const cleanHousehold = {
+    hasChildren: Boolean(household.hasChildren),
+    hasElderly: Boolean(household.hasElderly),
+    hasAsthma: Boolean(household.hasAsthma),
+    commuteMode: String(household.commuteMode || "car").slice(0, 30)
+  };
+
+  try {
+    const aqiData = await getCityAirQuality(sanitizedCity);
+    const plan = await generateGeminiPlan(sanitizedCity, aqiData, cleanHousehold);
+    res.status(200).json({ city: sanitizedCity, airQuality: aqiData, plan });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to generate action plan", details: err.message });
+  }
+}
+
+export function handleCalculateImpact(req, res) {
+  try {
+    const impact = computeImpact(req.body || {});
+    res.status(200).json(impact);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid impact parameters", details: err.message });
+  }
+}
+
+router.get("/health", handleHealth);
+router.get("/air-quality", handleAirQuality);
+router.post("/action-plan", handleActionPlan);
+router.post("/calculate-impact", handleCalculateImpact);
+
+export default router;

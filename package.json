@@ -1,0 +1,43 @@
+{
+  "name": "urban-air-assistant",
+  "version": "1.0.0",
+  "description": "Urban Air Quality Assistant - Actionable winter smog routines and low-emission guidance",
+  "main": "server/src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/src/index.js",
+    "lint": "eslint server/ client/ scripts/ --max-warnings=0",
+    "dup": "jscpd server/ client/",
+    "sec": "node scripts/security-check.js && npm audit --audit-level=high",
+    "test:cov": "vitest run --coverage",
+    "a11y": "node scripts/a11y-check.js",
+    "demo": "node scripts/record-demo.js",
+    "gate": "npm run lint && npm run dup && npm run sec && npm run test:cov"
+  },
+  "keywords": [
+    "air-quality",
+    "gemini",
+    "open-meteo",
+    "urban-health",
+    "hack2skill"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^3.4.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0",
+    "helmet": "^8.3.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "jscpd": "^5.4.3",
+    "playwright": "^1.65.1",
+    "vitest": "^5.1.0"
+  }
+}

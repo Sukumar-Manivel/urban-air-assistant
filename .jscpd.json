@@ -1,0 +1,14 @@
+{
+  "threshold": 0,
+  "minLines": 5,
+  "minTokens": 40,
+  "ignore": [
+    "**/node_modules/**",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/.agents/**",
+    "**/demo-output/**"
+  ],
+  "reporters": ["console"],
+  "mode": "mild"
+}

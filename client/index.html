@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Urban Air Quality Assistant - Real-time winter smog management, personalized Gemini health routines, and low-emission impact calculator.">
+  <title>Urban Air Quality Assistant | Low-Emission Winter Smog Intelligence</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header>
+    <div class="header-container">
+      <h1>Urban Air Quality Assistant</h1>
+      <p>Actionable Winter Smog Routines, Indoor Air Hacks &amp; Low-Emission Commute Alternatives</p>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <!-- Left Column: Air Quality & AI Action Plan -->
+    <div class="left-col">
+      <section class="card" aria-labelledby="city-search-heading">
+        <h2 id="city-search-heading">1. Ambient Air Quality Intelligence</h2>
+        <form id="city-form" aria-label="City search form">
+          <div class="form-group">
+            <label for="city-input">Select or Enter City</label>
+            <div class="city-input-row">
+              <input type="text" id="city-input" name="city" placeholder="e.g. Delhi, Beijing, Los Angeles" value="Delhi" required>
+              <button type="submit" id="btn-fetch-aqi" class="btn-primary">Track AQI</button>
+            </div>
+            <div class="quick-hotspots" aria-label="Quick smog hotspots">
+              <button type="button" class="btn-chip" data-city="Delhi">Delhi</button>
+              <button type="button" class="btn-chip" data-city="Beijing">Beijing</button>
+              <button type="button" class="btn-chip" data-city="Mumbai">Mumbai</button>
+              <button type="button" class="btn-chip" data-city="Los Angeles">Los Angeles</button>
+              <button type="button" class="btn-chip" data-city="Salt Lake City">Salt Lake City</button>
+              <button type="button" class="btn-chip" data-city="London">London</button>
+            </div>
+          </div>
+        </form>
+
+        <div id="aqi-display" class="aqi-hero-box" aria-live="polite">
+          <h3 id="aqi-location-label" style="font-size: 1.2rem; color: var(--text-muted);">Current Readings</h3>
+          <div id="aqi-value" class="aqi-score" style="color: var(--danger);">--</div>
+          <span id="aqi-badge" class="aqi-badge" style="background-color: var(--danger);">Loading AQI...</span>
+          <div class="pollutants-grid">
+            <div class="pollutant-card">
+              <span>PM2.5 (Fine Soot)</span>
+              <strong id="val-pm25">-- µg/m³</strong>
+            </div>
+            <div class="pollutant-card">
+              <span>PM10 (Dust/Ash)</span>
+              <strong id="val-pm10">-- µg/m³</strong>
+            </div>
+            <div class="pollutant-card">
+              <span>Carbon Monoxide</span>
+              <strong id="val-co">-- µg/m³</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card plan-section" aria-labelledby="household-heading">
+        <h2 id="household-heading">2. Household Profile &amp; GenAI Plan</h2>
+        <form id="plan-form" aria-label="Household vulnerability and commute profile">
+          <div class="form-group">
+            <label>Household Vulnerabilities</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label" for="chk-children">
+                <input type="checkbox" id="chk-children" name="hasChildren"> Children (Under 12)
+              </label>
+              <label class="checkbox-label" for="chk-elderly">
+                <input type="checkbox" id="chk-elderly" name="hasElderly"> Elderly Members (65+)
+              </label>
+              <label class="checkbox-label" for="chk-asthma">
+                <input type="checkbox" id="chk-asthma" name="hasAsthma"> Asthma / Respiratory Sensitivity
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="commute-mode-select">Primary Commute Mode</label>
+            <select id="commute-mode-select" name="commuteMode">
+              <option value="car">Solo Car (Gasoline/Diesel)</option>
+              <option value="motorcycle">Motorcycle / Scooter (High Direct Inhalation)</option>
+              <option value="carpool">Shared Carpool</option>
+              <option value="bus">City Bus</option>
+              <option value="metro">Electric Metro / Rapid Rail</option>
+              <option value="bicycle">Bicycle / Walking</option>
+            </select>
+          </div>
+
+          <button type="submit" id="btn-generate-plan" class="btn-primary" style="width: 100%;">
+            Generate Personalized Action Plan
+          </button>
+        </form>
+
+        <div id="ai-plan-container" style="margin-top: 20px;" aria-live="polite">
+          <!-- Dynamic AI Output inserted safely via textContent & DOM nodes -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: Interactive Impact Calculator & Indoor Air Hacks -->
+    <div class="right-col">
+      <section class="card" aria-labelledby="calc-heading">
+        <h2 id="calc-heading">3. Before &amp; After Reduction Calculator</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">
+          Quantify personal PM2.5 lung exposure avoided and household CO₂ emissions eliminated by switching habits during winter smog.
+        </p>
+
+        <form id="calc-form" aria-label="Impact calculator form">
+          <div class="form-group">
+            <label for="calc-weekly-km">Weekly Commute Distance (km)</label>
+            <input type="number" id="calc-weekly-km" name="weeklyKm" value="70" min="5" max="500" required>
+          </div>
+
+          <div class="form-group">
+            <label for="calc-target-mode">Switch Commute To</label>
+            <select id="calc-target-mode" name="targetMode">
+              <option value="metro">Electric Metro (90% Lower Emissions)</option>
+              <option value="carpool">Shared Carpool (65% Lower Emissions)</option>
+              <option value="bus">Public Bus (55% Lower Emissions)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Interventions Adopted</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label" for="calc-chk-mask">
+                <input type="checkbox" id="calc-chk-mask" name="usesMask" checked> Wear N95 Mask in Transit
+              </label>
+              <label class="checkbox-label" for="calc-chk-purifier">
+                <input type="checkbox" id="calc-chk-purifier" name="usesPurifier" checked> Use Indoor HEPA Air Purifier
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-calculate" class="btn-primary" style="width: 100%;">
+            Calculate Environmental &amp; Health Savings
+          </button>
+        </form>
+
+        <div id="calc-results" class="calculator-results" aria-live="polite">
+          <div class="result-card highlight">
+            <h3 style="font-size: 0.95rem; color: var(--text-muted);">Weekly CO₂ Savings</h3>
+            <div id="res-co2-savings" class="result-val">-- kg</div>
+            <p id="res-co2-desc" style="font-size: 0.85rem; color: var(--text-muted);">CO₂e eliminated</p>
+          </div>
+
+          <div class="result-card highlight">
+            <h3 style="font-size: 0.95rem; color: var(--text-muted);">PM2.5 Exposure Cut</h3>
+            <div id="res-pm25-savings" class="result-val">-- %</div>
+            <p id="res-pm25-desc" style="font-size: 0.85rem; color: var(--text-muted);">Harmful dose avoided</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 24px;" aria-labelledby="indoor-hacks-heading">
+        <h2 id="indoor-hacks-heading">4. DIY Indoor Air Quality Protocols</h2>
+        <div class="hack-item">
+          <strong style="color: var(--primary-color);">DIY Corsi-Rosenthal / Box Fan Filter</strong>
+          <p style="font-size: 0.9rem; margin-top: 4px;">
+            Tape a MERV-13 furnace filter to the intake side of a standard 20-inch box fan. Delivers 250+ CADR filtration at under 15% the cost of commercial units.
+          </p>
+        </div>
+        <div class="hack-item">
+          <strong style="color: var(--primary-color);">Winter Inversion Vent Window</strong>
+          <p style="font-size: 0.9rem; margin-top: 4px;">
+            Never ventilate between 6:00 AM - 10:00 AM or 7:00 PM - 11:00 PM when thermal inversions trap cold, soot-laden air near the ground.
+          </p>
+        </div>
+        <div class="hack-item">
+          <strong style="color: var(--primary-color);">Damp Mopping vs. Vacuuming</strong>
+          <p style="font-size: 0.9rem; margin-top: 4px;">
+            Vacuum exhaust without True-HEPA seals resuspends toxic ultra-fine heavy metal particles into breathing height. Always wet mop with microfiber.
+          </p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="header-container">
+      <p>&copy; 2026 Urban Air Quality Assistant &bull; PromptWars Challenge 06 &bull; Powered by Open-Meteo &amp; Google Gemini</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
