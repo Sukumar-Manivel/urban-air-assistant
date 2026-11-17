@@ -10,6 +10,14 @@
 
 ---
 
+## 🌐 Live Deployment & Demo
+
+* 🚀 **Live Web App (Google Cloud Run):** [https://urban-air-assistant-510810666377.asia-south1.run.app](https://urban-air-assistant-510810666377.asia-south1.run.app)
+* 🎬 **Live Walkthrough Video:** [https://youtu.be/DJSua4XdrUk](https://youtu.be/DJSua4XdrUk)
+* 💻 **GitHub Repository:** [https://github.com/Sukumar-Manivel/urban-air-assistant](https://github.com/Sukumar-Manivel/urban-air-assistant)
+
+---
+
 ## 📌 Problem Statement
 
 During acute winter smog episodes, toxic particulate concentrations (PM2.5, PM10, CO) surge to hazardous levels across dense metropolitan basins. Standard weather applications display numbers without context-aware guidance. 
