@@ -51,6 +51,12 @@ describe("Health & Air Quality Endpoints", () => {
     vi.spyOn(airService, "getCityAirQuality").mockRejectedValueOnce(new Error("Crash"));
     await handleAirQuality({ query: { city: "Delhi" } }, errRes);
     expect(errRes.statusCode).toBe(500);
+
+    const noMsgRes = createMockRes();
+    vi.spyOn(airService, "getCityAirQuality").mockRejectedValueOnce({ status: 503 });
+    await handleAirQuality({ query: { city: "Delhi" } }, noMsgRes);
+    expect(noMsgRes.statusCode).toBe(503);
+    expect(noMsgRes.body.error).toBe("Air quality lookup failed");
   });
 });
 
@@ -59,6 +65,10 @@ describe("Action Plan & Impact Endpoints", () => {
     const res = createMockRes();
     await handleActionPlan({ body: { city: "Delhi" } }, res);
     expect(res.statusCode).toBe(200);
+
+    const nullHouseholdRes = createMockRes();
+    await handleActionPlan({ body: { city: "Delhi", household: null } }, nullHouseholdRes);
+    expect(nullHouseholdRes.statusCode).toBe(200);
 
     const resDefault = createMockRes();
     await handleActionPlan({}, resDefault);

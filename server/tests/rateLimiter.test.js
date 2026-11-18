@@ -52,7 +52,7 @@ describe("Rate Limiter Window Expiration", () => {
     const next = () => { nextCount += 1; };
     const res = {};
 
-    rateLimiter({ connection: { remoteAddress: "10.0.0.2" } }, res, next);
+    rateLimiter({ socket: { remoteAddress: "10.0.0.2" } }, res, next);
     rateLimiter({}, res, next);
 
     cleanExpiredEntries(Date.now() + 120000);

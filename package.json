@@ -21,8 +21,15 @@
     "urban-health",
     "hack2skill"
   ],
-  "author": "",
+  "author": "Sukumar Manivel <24z266@psgitech.ac.in>",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sukumar-Manivel/urban-air-assistant.git"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@google/genai": "^3.4.0",
     "cors": "^2.8.6",
