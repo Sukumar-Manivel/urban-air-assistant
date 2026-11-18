@@ -64,8 +64,8 @@
       <section class="card plan-section" aria-labelledby="household-heading">
         <h2 id="household-heading">2. Household Profile &amp; GenAI Plan</h2>
         <form id="plan-form" aria-label="Household vulnerability and commute profile">
-          <div class="form-group">
-            <label>Household Vulnerabilities</label>
+          <fieldset class="form-group borderless-fieldset">
+            <legend class="group-legend">Household Vulnerabilities</legend>
             <div class="checkbox-group">
               <label class="checkbox-label" for="chk-children">
                 <input type="checkbox" id="chk-children" name="hasChildren"> Children (Under 12)
@@ -77,7 +77,7 @@
                 <input type="checkbox" id="chk-asthma" name="hasAsthma"> Asthma / Respiratory Sensitivity
               </label>
             </div>
-          </div>
+          </fieldset>
 
           <div class="form-group">
             <label for="commute-mode-select">Primary Commute Mode</label>
@@ -125,8 +125,8 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Interventions Adopted</label>
+          <fieldset class="form-group borderless-fieldset">
+            <legend class="group-legend">Interventions Adopted</legend>
             <div class="checkbox-group">
               <label class="checkbox-label" for="calc-chk-mask">
                 <input type="checkbox" id="calc-chk-mask" name="usesMask" checked> Wear N95 Mask in Transit
@@ -135,7 +135,7 @@
                 <input type="checkbox" id="calc-chk-purifier" name="usesPurifier" checked> Use Indoor HEPA Air Purifier
               </label>
             </div>
-          </div>
+          </fieldset>
 
           <button type="submit" id="btn-calculate" class="btn-primary" style="width: 100%;">
             Calculate Environmental &amp; Health Savings

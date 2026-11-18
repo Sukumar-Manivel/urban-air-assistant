@@ -190,7 +190,7 @@ function attachHotspots() {
       const cityInput = document.getElementById("city-input");
       if (cityInput && city) {
         cityInput.value = city;
-        fetchAqiForCity(city);
+        void fetchAqiForCity(city);
       }
     });
   }
@@ -204,14 +204,18 @@ export function initApp() {
   cityForm?.addEventListener("submit", (e) => {
     e.preventDefault();
     const city = document.getElementById("city-input")?.value;
-    if (city) fetchAqiForCity(city);
+    if (city) void fetchAqiForCity(city);
   });
 
-  planForm?.addEventListener("submit", handlePlanSubmit);
-  calcForm?.addEventListener("submit", handleCalcSubmit);
+  planForm?.addEventListener("submit", (e) => {
+    void handlePlanSubmit(e);
+  });
+  calcForm?.addEventListener("submit", (e) => {
+    void handleCalcSubmit(e);
+  });
 
   attachHotspots();
-  fetchAqiForCity("Delhi");
+  void fetchAqiForCity("Delhi");
 }
 
 if (typeof window !== "undefined") {

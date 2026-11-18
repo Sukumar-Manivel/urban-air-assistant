@@ -150,4 +150,4 @@ async function recordDemo() {
   }
 }
 
-recordDemo();
+void recordDemo();

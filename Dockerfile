@@ -7,7 +7,7 @@ ENV PORT=8080
 
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 COPY server ./server
 COPY client ./client

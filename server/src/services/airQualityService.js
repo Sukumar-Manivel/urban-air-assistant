@@ -113,8 +113,21 @@ export function getFallbackCity(cityName = "delhi") {
   return formatAirQualityResponse(match, { ...match, isFallback: true });
 }
 
+export function sanitizeCoordinate(val, min, max) {
+  const num = Number(val);
+  if (!Number.isFinite(num) || num < min || num > max) {
+    throw new Error(`Invalid coordinate: ${val}`);
+  }
+  return num;
+}
+
 export async function fetchCoordinates(city) {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+  const url = new URL("https://geocoding-api.open-meteo.com/v1/search");
+  url.searchParams.set("name", String(city || ""));
+  url.searchParams.set("count", "1");
+  url.searchParams.set("language", "en");
+  url.searchParams.set("format", "json");
+
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Geocoding HTTP error: ${res.status}`);
   const data = await res.json();
@@ -122,11 +135,19 @@ export async function fetchCoordinates(city) {
     throw new Error(`City not found: ${city}`);
   }
   const top = data.results[0];
-  return { name: top.name, country: top.country, latitude: top.latitude, longitude: top.longitude };
+  const latitude = sanitizeCoordinate(top.latitude, -90, 90);
+  const longitude = sanitizeCoordinate(top.longitude, -180, 180);
+  return { name: top.name, country: top.country, latitude, longitude };
 }
 
 export async function fetchLiveAirQuality(lat, lon) {
-  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,carbon_monoxide,us_aqi`;
+  const safeLat = sanitizeCoordinate(lat, -90, 90);
+  const safeLon = sanitizeCoordinate(lon, -180, 180);
+  const url = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
+  url.searchParams.set("latitude", safeLat.toString());
+  url.searchParams.set("longitude", safeLon.toString());
+  url.searchParams.set("current", "pm10,pm2_5,carbon_monoxide,us_aqi");
+
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Air Quality HTTP error: ${res.status}`);
   const data = await res.json();

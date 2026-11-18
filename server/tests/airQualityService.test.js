@@ -7,6 +7,7 @@ import {
   fetchCoordinates,
   fetchLiveAirQuality,
   getCityAirQuality,
+  sanitizeCoordinate,
   FALLBACK_CITIES
 } from "../src/services/airQualityService.js";
 
@@ -72,6 +73,13 @@ describe("External Geocoding & Live Air Quality", () => {
 
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 });
     await expect(fetchLiveAirQuality(0, 0)).rejects.toThrow("Air Quality HTTP error");
+  });
+
+  it("should validate and sanitize coordinate ranges", () => {
+    expect(sanitizeCoordinate(45.5, -90, 90)).toBe(45.5);
+    expect(() => sanitizeCoordinate("invalid", -90, 90)).toThrow("Invalid coordinate");
+    expect(() => sanitizeCoordinate(95, -90, 90)).toThrow("Invalid coordinate");
+    expect(() => sanitizeCoordinate(-190, -180, 180)).toThrow("Invalid coordinate");
   });
 });
 
