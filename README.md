@@ -3,7 +3,7 @@
 > **PromptWars Challenge 06** — Actionable winter smog routines, indoor air quality hacks, and sustainable low-emission alternatives tailored to household profiles and live ambient pollutants.
 
 [![Quality Gate](https://img.shields.io/badge/Quality%20Gate-100%25%20PASS-brightgreen)](#quality-gates--audit-results)
-[![Test Coverage](https://img.shields.io/badge/Coverage-98.6%25-brightgreen)](#test-coverage)
+[![Test Coverage](https://img.shields.io/badge/Coverage-98.9%25-brightgreen)](#test-coverage)
 [![Accessibility](https://img.shields.io/badge/WCAG%202.1%20AA-0%20Violations-brightgreen)](#accessibility-audit)
 [![Repo Size](https://img.shields.io/badge/Repo%20Size-0.20%20MB-blue)](#lightweight-footprint)
 [![Deploy Ready](https://img.shields.io/badge/Deploy-Cloud%20Run%20Ready-blue)](#docker--cloud-run-deployment)
@@ -117,7 +117,7 @@ All verification gates pass with a **100% score**:
 | **Linting** | ESLint Flat Config | Complexity <= 8, Max Lines/Fn <= 35, Depth <= 3 | **0 Errors, 0 Warnings** |
 | **Duplication** | jscpd | Zero cloned tokens across client & server | **0.00% Duplication** |
 | **Security** | AST/Regex Scanner + npm audit | No API keys, no eval/innerHTML, no high CVEs | **0 Violations, 0 Vulnerabilities** |
-| **Test Coverage** | Vitest (v8 Provider) | >95% Lines/Stmts/Funcs, >90% Branches | **98.6% Stmts, 94.7% Branch, 100% Funcs** |
+| **Test Coverage** | Vitest (v8 Provider) | >95% Lines/Stmts/Funcs, >90% Branches | **98.9% Stmts, 95.1% Branch, 100% Funcs** |
 | **Accessibility** | Playwright + Axe Core | WCAG 2.1 AA (`wcag2a`, `wcag2aa`, `wcag21aa`) | **0 Violations** |
 | **Demo Recording** | Playwright Video | Automated UI interaction recording | **Saved in `demo-output/`** |
 

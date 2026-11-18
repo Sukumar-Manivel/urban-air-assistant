@@ -123,14 +123,34 @@ describe("Caching & Eviction Logic", () => {
 });
 
 describe("Fallback Logic & Unknown Locations", () => {
-  it("should handle network failure gracefully with fallback city", async () => {
+  it("should use preset fallback when upstream fails for known cities", async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("Network Down"));
     const fallbackRes = await getCityAirQuality("delhi");
     expect(fallbackRes.source).toBe("in-memory-fallback");
 
     const defaultCall = await getCityAirQuality();
     expect(defaultCall.city).toBe("Delhi");
+  });
 
-    await expect(getCityAirQuality("Tamil Nadu")).rejects.toThrow('Location "Tamil Nadu" not found');
+  it("should throw 404 when location is not found by geocoding", async () => {
+    global.fetch = mockJsonFetch({ results: [] });
+    await expect(getCityAirQuality("Tamil Nadu")).rejects.toMatchObject({
+      message: expect.stringContaining('Location "Tamil Nadu" not found'),
+      status: 404
+    });
+  });
+
+  it("should throw 503 when air quality API fails for valid cities like Chennai", async () => {
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ results: [{ name: "Chennai", country: "India", latitude: 13.08, longitude: 80.27 }] })
+      })
+      .mockResolvedValueOnce({ ok: false, status: 503 });
+
+    await expect(getCityAirQuality("Chennai")).rejects.toMatchObject({
+      message: expect.stringContaining('temporarily unavailable for "Chennai"'),
+      status: 503
+    });
   });
 });
