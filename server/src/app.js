@@ -5,6 +5,15 @@ import cors from "cors";
 import apiRouter from "./routes/api.js";
 import { rateLimiter } from "./middleware/rateLimiter.js";
 
+export function getCorsOptions() {
+  const allowed = process.env.ALLOWED_ORIGINS;
+  if (!allowed || allowed === "*") {
+    return { origin: true, methods: ["GET", "POST", "OPTIONS"] };
+  }
+  const origins = allowed.split(",").map((o) => o.trim());
+  return { origin: origins, methods: ["GET", "POST", "OPTIONS"] };
+}
+
 export function configureSecurity(app) {
   app.use(
     helmet({
@@ -21,7 +30,7 @@ export function configureSecurity(app) {
       }
     })
   );
-  app.use(cors());
+  app.use(cors(getCorsOptions()));
   app.use(express.json());
 }
 

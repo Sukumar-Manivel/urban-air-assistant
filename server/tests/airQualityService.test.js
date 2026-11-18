@@ -46,10 +46,10 @@ describe("AQI Categorization & Extraction", () => {
     expect(fallbackFormatted.source).toBe("open-meteo-live");
   });
 
-  it("should return fallback city for known and unknown cities", () => {
+  it("should return fallback city for known and throw for unknown cities", () => {
     expect(getFallbackCity("beijing").city).toBe("Beijing");
     expect(getFallbackCity().city).toBe("Delhi");
-    expect(getFallbackCity("atlantis").city).toBe("Delhi");
+    expect(() => getFallbackCity("atlantis")).toThrow("not found");
   });
 });
 
@@ -63,7 +63,7 @@ describe("External Geocoding & Live Air Quality", () => {
     await expect(fetchCoordinates("Nowhere")).rejects.toThrow("Geocoding HTTP error");
 
     global.fetch = mockJsonFetch({ results: [] });
-    await expect(fetchCoordinates("GhostCity")).rejects.toThrow("City not found");
+    await expect(fetchCoordinates("GhostCity")).rejects.toThrow("Location \"GhostCity\" not found");
   });
 
   it("should fetch live metrics or throw on failure", async () => {
@@ -104,10 +104,22 @@ describe("Caching and Fallback Logic", () => {
 
   it("should handle network failure gracefully with fallback city", async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("Network Down"));
-    const fallbackRes = await getCityAirQuality("unknown_place");
+    const fallbackRes = await getCityAirQuality("delhi");
     expect(fallbackRes.source).toBe("in-memory-fallback");
 
     const defaultCall = await getCityAirQuality();
     expect(defaultCall.city).toBe("Delhi");
+
+    await expect(getCityAirQuality("Tamil Nadu")).rejects.toThrow("Location \"Tamil Nadu\" not found");
+  });
+
+  it("should evict oldest cache entry when reaching capacity", async () => {
+    global.fetch = mockJsonFetch({
+      results: [{ name: "City", country: "C", latitude: 10, longitude: 10 }],
+      current: { us_aqi: 50, pm2_5: 10, pm10: 20, carbon_monoxide: 100 }
+    });
+    for (let i = 0; i < 102; i++) {
+      await getCityAirQuality(`city_${i}`);
+    }
   });
 });

@@ -146,15 +146,32 @@ export function generateDeterministicPlan(city, aqiData, household) {
   };
 }
 
+function formatMetric(val) {
+  if (val === undefined || val === null) return "N/A";
+  return `${val} ug/m3`;
+}
+
+function formatFlag(flag) {
+  return flag ? "Yes" : "No";
+}
+
 export function buildPrompt(city, aqiData, household) {
+  const p = aqiData.pollutants || {};
+  const cat = aqiData.category || "Moderate";
+  const mode = household.commuteMode || "Car";
   return `Act as an expert Urban Air Quality & Low-Emission Health Specialist.
 Generate an actionable winter smog daily routine for ${city}.
-Live Air Metrics: AQI ${aqiData.aqi}, PM2.5: ${aqiData.pollutants?.pm25 || "N/A"} ug/m3, Category: ${aqiData.category}.
+Live Air Metrics:
+- US AQI: ${aqiData.aqi} (${cat})
+- PM2.5: ${formatMetric(p.pm25)}
+- PM10: ${formatMetric(p.pm10)}
+- Carbon Monoxide (CO): ${formatMetric(p.co)}
+
 Household Profile:
-- Has Children: ${household.hasChildren ? "Yes" : "No"}
-- Has Elderly: ${household.hasElderly ? "Yes" : "No"}
-- Has Asthma/Respiratory Illness: ${household.hasAsthma ? "Yes" : "No"}
-- Current Commute Mode: ${household.commuteMode || "Car"}
+- Has Children: ${formatFlag(household.hasChildren)}
+- Has Elderly: ${formatFlag(household.hasElderly)}
+- Has Asthma/Respiratory Illness: ${formatFlag(household.hasAsthma)}
+- Current Commute Mode: ${mode}
 
 Provide specific, practical guidance on reducing personal PM2.5 exposure and family carbon footprint.`;
 }
@@ -179,7 +196,9 @@ export async function generateGeminiPlan(city, aqiData, household) {
     });
 
     return JSON.parse(response.text);
-  } catch {
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn("Gemini generation failed, using deterministic fallback:", err.message);
     return generateDeterministicPlan(city, aqiData, household);
   }
 }

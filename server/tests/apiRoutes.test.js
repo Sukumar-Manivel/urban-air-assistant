@@ -40,6 +40,13 @@ describe("Health & Air Quality Endpoints", () => {
     await handleAirQuality({ query: {} }, res2);
     expect(res2.statusCode).toBe(200);
 
+    const notFoundRes = createMockRes();
+    const notFoundErr = new Error('Location "Tamil Nadu" not found.');
+    notFoundErr.status = 404;
+    vi.spyOn(airService, "getCityAirQuality").mockRejectedValueOnce(notFoundErr);
+    await handleAirQuality({ query: { city: "Tamil Nadu" } }, notFoundRes);
+    expect(notFoundRes.statusCode).toBe(404);
+
     const errRes = createMockRes();
     vi.spyOn(airService, "getCityAirQuality").mockRejectedValueOnce(new Error("Crash"));
     await handleAirQuality({ query: { city: "Delhi" } }, errRes);

@@ -47,9 +47,18 @@ describe("Gemini Plan Generation & Prompting", () => {
     expect(plan.aqiLevel).toBe("Hazardous");
   });
 
-  it("should build prompt string with proper variables", () => {
-    const prompt = buildPrompt("Delhi", { aqi: 200, category: "Unhealthy" }, { hasAsthma: true });
+  it("should build prompt string with proper variables and all pollutants", () => {
+    const aqiData = {
+      aqi: 200,
+      category: "Unhealthy",
+      pollutants: { pm25: 145.2, pm10: 210.5, co: 1200 }
+    };
+    const prompt = buildPrompt("Delhi", aqiData, { hasAsthma: true });
     expect(prompt).toContain("Has Asthma/Respiratory Illness: Yes");
+    expect(prompt).toContain("US AQI: 200");
+    expect(prompt).toContain("PM2.5: 145.2 ug/m3");
+    expect(prompt).toContain("PM10: 210.5 ug/m3");
+    expect(prompt).toContain("Carbon Monoxide (CO): 1200 ug/m3");
   });
 
   it("should fallback deterministically or invoke SDK cleanly", async () => {

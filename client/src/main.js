@@ -100,11 +100,14 @@ function renderActionPlan(plan) {
 export async function fetchAqiForCity(city) {
   try {
     const res = await fetch(`/api/air-quality?city=${encodeURIComponent(city)}`);
-    if (!res.ok) throw new Error("AQI request failed");
     const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || "AQI request failed");
+    }
     updateAqiDisplay(data);
     return data;
-  } catch {
+  } catch (err) {
+    setElementText("aqi-location-label", err.message || "Location not found");
     setElementText("aqi-badge", "Offline / Fallback Data");
     return null;
   }
@@ -136,11 +139,14 @@ export async function handlePlanSubmit(event) {
       body: JSON.stringify(payload)
     });
     const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.error || `Server error: ${res.status}`);
+    }
     if (result.plan) {
       renderActionPlan(result.plan);
     }
-  } catch {
-    setElementText("ai-plan-container", "Unable to load plan. Please try again.");
+  } catch (err) {
+    setElementText("ai-plan-container", err.message || "Unable to load plan. Please try again.");
   }
 }
 
@@ -171,14 +177,18 @@ export async function handleCalcSubmit(event) {
       body: JSON.stringify(payload)
     });
     const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || `Server error: ${res.status}`);
+    }
     if (data.savings) {
       setElementText("res-co2-savings", `${data.savings.co2SavedKgPerWeek} kg`);
       setElementText("res-co2-desc", `${data.savings.co2ReductionPercent}% weekly reduction`);
       setElementText("res-pm25-savings", `${data.savings.exposureReductionPercent}%`);
       setElementText("res-pm25-desc", `${data.savings.pm25AvoidedMicrograms} µg PM2.5 avoided`);
     }
-  } catch {
+  } catch (err) {
     setElementText("res-co2-savings", "--");
+    setElementText("res-co2-desc", err.message || "Calculation failed");
   }
 }
 

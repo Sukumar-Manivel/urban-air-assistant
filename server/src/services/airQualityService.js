@@ -1,5 +1,14 @@
 const CACHE_TTL_MS = 15 * 60 * 1000;
+const MAX_CACHE_ENTRIES = 100;
 const cache = new Map();
+
+function setCacheEntry(key, data) {
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value;
+    cache.delete(oldestKey);
+  }
+  cache.set(key, { cachedAt: Date.now(), data });
+}
 
 export const FALLBACK_CITIES = {
   delhi: {
@@ -109,7 +118,12 @@ export function formatAirQualityResponse(cityData, airData = {}) {
 
 export function getFallbackCity(cityName = "delhi") {
   const normalized = cityName.toLowerCase().replace(/[\s-]+/g, "_");
-  const match = FALLBACK_CITIES[normalized] || FALLBACK_CITIES.delhi;
+  const match = FALLBACK_CITIES[normalized];
+  if (!match) {
+    const err = new Error(`Location "${cityName}" not found. Please search by city name (e.g., Chennai, Coimbatore, Delhi, Paris).`);
+    err.status = 404;
+    throw err;
+  }
   return formatAirQualityResponse(match, { ...match, isFallback: true });
 }
 
@@ -128,11 +142,13 @@ export async function fetchCoordinates(city) {
   url.searchParams.set("language", "en");
   url.searchParams.set("format", "json");
 
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw new Error(`Geocoding HTTP error: ${res.status}`);
   const data = await res.json();
   if (!data.results || data.results.length === 0) {
-    throw new Error(`City not found: ${city}`);
+    const err = new Error(`Location "${city}" not found. Please search by city name (e.g., Chennai, Coimbatore, Delhi, Paris).`);
+    err.status = 404;
+    throw err;
   }
   const top = data.results[0];
   const latitude = sanitizeCoordinate(top.latitude, -90, 90);
@@ -148,7 +164,7 @@ export async function fetchLiveAirQuality(lat, lon) {
   url.searchParams.set("longitude", safeLon.toString());
   url.searchParams.set("current", "pm10,pm2_5,carbon_monoxide,us_aqi");
 
-  const res = await fetch(url);
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw new Error(`Air Quality HTTP error: ${res.status}`);
   const data = await res.json();
   return data.current || {};
@@ -162,13 +178,22 @@ export async function getCityAirQuality(cityName) {
     return cached.data;
   }
 
+  const normalized = cleanCity.toLowerCase().replace(/[\s-]+/g, "_");
+  const isKnownFallback = Object.prototype.hasOwnProperty.call(FALLBACK_CITIES, normalized);
+
   try {
     const geo = await fetchCoordinates(cleanCity);
     const air = await fetchLiveAirQuality(geo.latitude, geo.longitude);
     const result = formatAirQualityResponse(geo, air);
-    cache.set(cacheKey, { cachedAt: Date.now(), data: result });
+    setCacheEntry(cacheKey, result);
     return result;
-  } catch {
+  } catch (err) {
+    if (err.status === 404 || !isKnownFallback) {
+      if (err.status) throw err;
+      const notFound = new Error(`Location "${cleanCity}" not found. Please search by city name (e.g., Chennai, Coimbatore, Delhi, Paris).`);
+      notFound.status = 404;
+      throw notFound;
+    }
     return getFallbackCity(cleanCity);
   }
 }

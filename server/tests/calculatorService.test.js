@@ -15,7 +15,7 @@ describe("Calculator Factors & Inhalation", () => {
     expect(calculateCo2("bus", 100)).toBe(8.2);
     expect(calculateCo2("metro", 100)).toBe(2.8);
     expect(calculateCo2("bicycle", 100)).toBe(0);
-    expect(calculateCo2("unknown_mode", 100)).toBe(19.2);
+    expect(() => calculateCo2("unknown_mode", 100)).toThrow("Invalid transport mode");
   });
 
   it("should calculate inhalation with masks and indoor purifiers", () => {
@@ -25,7 +25,7 @@ describe("Calculator Factors & Inhalation", () => {
   });
 });
 
-describe("Calculator Sanitization & Impact", () => {
+describe("Calculator Sanitization", () => {
   it("should sanitize and clamp input parameters", () => {
     const clamped = sanitizeInputs({ weeklyKm: 5000, aqi: 1000 });
     expect(clamped.weeklyKm).toBe(1000);
@@ -36,6 +36,18 @@ describe("Calculator Sanitization & Impact", () => {
     expect(defaultSanitized.aqi).toBe(180);
   });
 
+  it("should throw on invalid modes, negative numbers, and string booleans", () => {
+    expect(() => sanitizeInputs({ currentMode: "rocket" })).toThrow("Invalid currentMode");
+    expect(() => sanitizeInputs({ targetMode: "teleport" })).toThrow("Invalid targetMode");
+    expect(() => sanitizeInputs({ weeklyKm: -50 })).toThrow("non-negative");
+    expect(() => sanitizeInputs({ weeklyKm: "invalid" })).toThrow("non-negative");
+    expect(() => sanitizeInputs({ aqi: -10 })).toThrow("non-negative");
+    expect(() => sanitizeInputs({ usesMask: "false" })).toThrow("usesMask must be a boolean");
+    expect(() => sanitizeInputs({ usesPurifier: "true" })).toThrow("usesPurifier must be a boolean");
+  });
+});
+
+describe("Calculator Savings & Impact", () => {
   it("should compute savings without zero division errors", () => {
     const savings = computeSavings(10, 2, 500, 100);
     expect(savings.co2SavedKgPerWeek).toBe(8);

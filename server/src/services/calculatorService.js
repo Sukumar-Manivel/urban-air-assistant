@@ -1,4 +1,4 @@
-const CO2_FACTORS = {
+export const CO2_FACTORS = {
   car: 0.192,
   motorcycle: 0.103,
   carpool: 0.064,
@@ -10,7 +10,10 @@ const CO2_FACTORS = {
 
 export function calculateCo2(mode, distanceKm) {
   const normalized = (mode || "car").toLowerCase();
-  const factor = CO2_FACTORS[normalized] ?? CO2_FACTORS.car;
+  if (!Object.prototype.hasOwnProperty.call(CO2_FACTORS, normalized)) {
+    throw new Error(`Invalid transport mode: ${mode}`);
+  }
+  const factor = CO2_FACTORS[normalized];
   return Number((distanceKm * factor).toFixed(2));
 }
 
@@ -27,14 +30,41 @@ export function calculateInhalation(aqi, distanceKm, usesMask, usesPurifier) {
   return Math.round(total);
 }
 
+function validateMode(mode, name) {
+  const norm = String(mode || "").toLowerCase();
+  if (!Object.prototype.hasOwnProperty.call(CO2_FACTORS, norm)) {
+    throw new Error(`Invalid ${name}: ${mode}`);
+  }
+  return norm;
+}
+
+function validateNumber(val, name) {
+  const num = Number(val);
+  if (!Number.isFinite(num) || num < 0) {
+    throw new Error(`${name} must be a non-negative finite number`);
+  }
+  return num;
+}
+
+function validateBoolean(val, name) {
+  if (val !== undefined && typeof val !== "boolean") {
+    throw new Error(`${name} must be a boolean`);
+  }
+  return Boolean(val);
+}
+
 export function sanitizeInputs(input = {}) {
+  const currentMode = validateMode(input.currentMode || "car", "currentMode");
+  const targetMode = validateMode(input.targetMode || "metro", "targetMode");
+  const km = validateNumber(input.weeklyKm ?? 60, "weeklyKm");
+  const aqi = validateNumber(input.aqi ?? 180, "aqi");
   return {
-    currentMode: input.currentMode || "car",
-    targetMode: input.targetMode || "metro",
-    weeklyKm: Math.max(1, Math.min(1000, Number(input.weeklyKm) || 60)),
-    aqi: Math.max(10, Math.min(800, Number(input.aqi) || 180)),
-    usesMask: Boolean(input.usesMask),
-    usesPurifier: Boolean(input.usesPurifier)
+    currentMode,
+    targetMode,
+    weeklyKm: Math.min(1000, km),
+    aqi: Math.min(800, aqi),
+    usesMask: validateBoolean(input.usesMask, "usesMask"),
+    usesPurifier: validateBoolean(input.usesPurifier, "usesPurifier")
   };
 }
 
