@@ -83,7 +83,7 @@ describe("External Geocoding & Live Air Quality", () => {
   });
 });
 
-describe("Caching and Fallback Logic", () => {
+describe("Caching & Eviction Logic", () => {
   it("should succeed with live fetch and subsequently hit in-memory cache", async () => {
     global.fetch = vi.fn()
       .mockResolvedValueOnce({
@@ -97,11 +97,32 @@ describe("Caching and Fallback Logic", () => {
 
     const liveRes = await getCityAirQuality("Tokyo");
     expect(liveRes.city).toBe("Tokyo");
-
     const cachedRes = await getCityAirQuality("Tokyo");
     expect(cachedRes.city).toBe("Tokyo");
   });
 
+  it("should evict oldest cache entry when reaching capacity", async () => {
+    const fetchMock = mockJsonFetch({
+      results: [{ name: "City", country: "C", latitude: 10, longitude: 10 }],
+      current: { us_aqi: 50, pm2_5: 10, pm10: 20, carbon_monoxide: 100 }
+    });
+    global.fetch = fetchMock;
+    for (let i = 0; i < 102; i++) {
+      await getCityAirQuality(`city_${i}`);
+    }
+    const count = fetchMock.mock.calls.length;
+
+    const cached = await getCityAirQuality("city_101");
+    expect(cached.city).toBe("City");
+    expect(fetchMock.mock.calls.length).toBe(count);
+
+    const evicted = await getCityAirQuality("city_0");
+    expect(evicted.city).toBe("City");
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(count);
+  });
+});
+
+describe("Fallback Logic & Unknown Locations", () => {
   it("should handle network failure gracefully with fallback city", async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("Network Down"));
     const fallbackRes = await getCityAirQuality("delhi");
@@ -110,16 +131,6 @@ describe("Caching and Fallback Logic", () => {
     const defaultCall = await getCityAirQuality();
     expect(defaultCall.city).toBe("Delhi");
 
-    await expect(getCityAirQuality("Tamil Nadu")).rejects.toThrow("Location \"Tamil Nadu\" not found");
-  });
-
-  it("should evict oldest cache entry when reaching capacity", async () => {
-    global.fetch = mockJsonFetch({
-      results: [{ name: "City", country: "C", latitude: 10, longitude: 10 }],
-      current: { us_aqi: 50, pm2_5: 10, pm10: 20, carbon_monoxide: 100 }
-    });
-    for (let i = 0; i < 102; i++) {
-      await getCityAirQuality(`city_${i}`);
-    }
+    await expect(getCityAirQuality("Tamil Nadu")).rejects.toThrow('Location "Tamil Nadu" not found');
   });
 });
